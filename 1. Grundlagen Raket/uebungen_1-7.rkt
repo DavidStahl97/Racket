@@ -29,29 +29,26 @@
 
 
 
-(define (get-numbers2 n numbers)
+(define (get-numbers n)
   (cond
-    ((= n 0) (list))
-    (else (append (get-numbers2 (- n 1) numbers) (list n)))
+    ((= n 0) '())
+    (else (cons n (get-numbers (- n 1))))
   )
 )
-
-(define (get-numbers n) (get-numbers2 n (list)))
   
-
 (get-numbers 5)
 
+(define (remove-last numbers)
+  (remove (length numbers) numbers))
 
-
-
-
-
-(define (get-numbers3 n)
+(define (my-reverse numbers)
   (cond
-    ((= n 1) 1)
-    (else n (get-numbers3 (- n 1)))
+    ((= (length numbers) 0) '())
+    (else (cons (last numbers) (my-reverse (remove-last numbers))))
   )
 )
 
-(get-numbers3 5)
+
+
+
 
