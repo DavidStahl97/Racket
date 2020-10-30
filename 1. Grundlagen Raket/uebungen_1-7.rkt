@@ -1,8 +1,6 @@
 #lang racket
 
-(define (distance x y) (sqrt (+ (quad x) (quad y))))
 
-(distance 2 2)
 
 (append (list 1) (list 2))
 
