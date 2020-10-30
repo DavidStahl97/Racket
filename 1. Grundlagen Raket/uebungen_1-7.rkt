@@ -6,14 +6,7 @@
 
 
 
-(define (get-numbers n)
-  (cond
-    ((= n 0) '())
-    (else (cons n (get-numbers (- n 1))))
-  )
-)
-  
-(get-numbers 5)
+
 
 (define (remove-last numbers)
   (remove (length numbers) numbers))
