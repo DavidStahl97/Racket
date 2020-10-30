@@ -1,26 +1,5 @@
 #lang racket
 
-(/
- (+ 5 4 (- 2 ( - 3 (+ 6 ( / 4 5)))))
- (* 3 (- 6 2) (- 2 7))
-)
-
-(define (quad a) (* a a))
-
-(define (small a b c)
-  (cond
-    ((< a b c) a)
-    ((< b a c) b)
-    (else c)
-  )
-)
-
-(define (groestesQuadratSum a b c)
-  (+ (quad a) (quad b) (quad c) (- (quad (small a b c))))
-)
-
-(groestesQuadratSum 5 4 3)
-
 (define (distance x y) (sqrt (+ (quad x) (quad y))))
 
 (distance 2 2)
