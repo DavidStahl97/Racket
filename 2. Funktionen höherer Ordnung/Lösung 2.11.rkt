@@ -18,6 +18,8 @@
     (else (λ (x)
             (func ((repeated2 func (- times 1)) x))))))
 
+;; (func ((x -> func ((repeated2 ..) x)) x))
+
 ((repeated2 add1 10) 1)
 
 ((repeated sqr 2) 3)
