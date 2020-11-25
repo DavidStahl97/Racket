@@ -41,18 +41,24 @@
 (define (count-stream stream)
   (right-reduce (λ (x y) (add1 y)) 0 stream))
 
-;; Exercise list->stream
+;; list->stream
 (define (to-stream lst)
   (if (empty? lst)
       the-empty-stream  
       (cons-stream (first lst) (rest lst))))
 
+;; stream->list
+(define (to-list stream)
+  (if (empty-stream? stream)
+      '()
+      (cons (head stream) (to-list (tail stream)))))
+
 ;; example
-(define (count-primes lst)
-  (count-stream
+(define (filter-primes lst)
+  (to-list
     (filter-stream prime?
       (to-stream lst))))
 
 (define numbers (list 7 5 4 3 23 43 54 65 5 2 1))
 
-(count-primes numbers)
+(filter-primes numbers)
