@@ -30,3 +30,20 @@
 (check-equal? (insert-sort '()) '())
 
 
+; 1.2 Flatten
+
+;; Rekursiv wird der Baum untersucht.
+;; Die Blätter, die keine Liste sind, werden als Liste zurückgegeben
+;; und dann werden die Blätter durch append zusammengeführt.
+(define (flatten tree)
+  (if (list? tree)
+      (foldr append '()
+             (map (λ (child) (flatten child)) tree))
+      (list tree)))
+
+
+(check-equal? (flatten '((a) b (c (d) e) ())) '(a b c d e))
+(check-equal? (flatten '()) '())
+(check-equal? (flatten '(a (b c (d)) e (f))) '(a b c d e f))
+
+
