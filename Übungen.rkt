@@ -47,3 +47,49 @@
 (check-equal? (flatten '(a (b c (d)) e (f))) '(a b c d e f))
 
 
+; 1.3 Ströme
+
+;; cons-stream
+(define-syntax cons-stream
+  (syntax-rules ()
+    ((cons-stream x y)
+     (cons x (delay y)))))
+
+(define head car)
+(define (tail s) (force (cdr s)))
+
+(define the-empty-stream '())
+(define empty-stream? null?)
+
+;; Datenabstraktion zur Vereinfachung
+(define (make-fib-pair n fib) (list n fib))
+(define (part-fib fib-pair) (first (rest fib-pair)))
+(define (part-n fib-pair) (first fib-pair))
+
+(define (calc-fib-pair fib1 fib2)
+  (make-fib-pair (add1 (part-n fib2))
+                 (+ (part-fib fib1) (part-fib fib2))))
+
+;; Zusammenführung der zwei Ströme
+(define (add-fib-pair s1 s2)
+  (cons-stream (calc-fib-pair (head s1) (head s2))
+               (add-fib-pair (tail s1) (tail s2))))
+
+;; Der eigentliche Fib-Stream
+(define fib-stream2
+    (cons-stream (make-fib-pair 0 0)
+               (cons-stream (make-fib-pair 1 1)
+                            (add-fib-pair fib-stream2 (tail fib-stream2)))))
+
+(define fib-stream (λ () fib-stream2))
+
+;; Tests
+(define a (fib-stream))
+
+(check-equal? (head a) '(0 0))
+(check-equal? (head (tail a)) '(1 1))
+(check-equal? (head (tail (tail a))) '(2 1))
+(check-equal? (head (tail (tail (tail a)))) '(3 2))
+(check-equal? (head (tail (tail (tail (tail a))))) '(4 3))
+(check-equal? (head (tail (tail (tail (tail (tail a)))))) '(5 5))
+(check-equal? (head (tail (tail (tail (tail (tail (tail a))))))) '(6 8))
