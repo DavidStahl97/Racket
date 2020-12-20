@@ -1,5 +1,7 @@
 #lang racket
 
+; 1. Programmieraufgaben
+
 (require rackunit)
 
 ; 1.1 Einfügesort
@@ -93,3 +95,124 @@
 (check-equal? (head (tail (tail (tail (tail a))))) '(4 3))
 (check-equal? (head (tail (tail (tail (tail (tail a)))))) '(5 5))
 (check-equal? (head (tail (tail (tail (tail (tail (tail a))))))) '(6 8))
+
+
+
+; 2. Theoriefragen
+
+;; 1. Was ist funktionale Programmierung?
+;;
+;; Die funktionale Programmierung ist ein Programmierstil, der sich an die Funktionen aus der Mathematik anlegt.
+;; Mit der gleichen Eingabe muss die Funktion immer die gleiche Ausgabe zurückgegeben. Weshalb eine Funktion keinen internen Zustand besitzen darf.
+;; Ausßerdem dürfen Funktionen als Parameter einer anderen Funktion übergeben werden.
+
+
+;; 2. Sind (1 2 . 3), (#t #t #f), () Listen? Begründen Sie Ihre Antwort.
+;;
+;; Liste ist rekursiv mithilfe eines Paars defineiert:
+;; Eine Liste ist entweder eine leere Liste oder sie ist ein Paar bestehend aus einem Wert und einer Liste.
+;;
+;; 1. (1 2 . 3): keine Liste
+(check-equal? (list? '(1 2 . 3)) false)
+;; Mit der Klammer und dem Punkt wird ein Paar definiert.
+;; Jedoch darf ein Paar nur aus zwei Werten bestehen.
+;; Außerdem müsste der zweite Wert eine leere Liste sein, damit ein Paar eine gültige Liste ist:
+(check-equal? (list? (cons 1 '())) true)
+;;
+;; 2. (#t #t #f): ist eine Liste
+(check-equal? (list? '(#t #t #f)) true)
+;;
+;; 3. (): eine gültige, leere Liste
+(check-equal? (list? '()) true)
+
+
+;; 3. Was ist eine Umgebung (Environment) und wie wird darüber das statische Binden umgesetzt?
+;;
+;; Es gibt eine globale Umgebung, mithilfe von dem Symbol "define" ein Symbol mit einem Wert oder mit einem Lambda-Ausdruck gebunden werden kann:
+(define konstante 1)
+(define mal-2 (λ (a) (* a 2)))
+;;
+;; Dadurch kann eine Prozedur Symbole aus der globalen Umgebung verwenden, da sie dort definiert ist:
+(define mal-4 (λ (a) (* (mal-2 a) 2)))
+;; In einer anderen Umgebung kann das Symbol mal-4 eine andere Bedeutung haben.
+;;
+;; Bei einem Prozeduraufruf wird eine weitere Umgebung erzeugt, wo die Parameter mit den übergebenen Werten gebunden werden:
+(mal-4 3)
+;; Die neu erzeugte Umgebung bindet das Symbol a mit dem Wert 3.
+;; Die neu erzeugte Umgebung besitzt ebenfalls ein Verweis auf die globale Umgebung, sodass das Symbol mal-2 gefunden werden kann.
+
+
+;; 4. Was ist ein Abschlussobjekt (Closure) und wann entsteht es?
+;;
+;; Ein Abschlussobjekt besteht aus einem Lambda-Ausdruck und einer Umgebung, wo der Lambda-Ausdruck definiert ist.
+;; Ein Beispiel ist das Abschlussobjekt mal-2 aus der Frage 3. Mit define wird das Abschlussobjekt erzeugt. Die Umgebung des Abschlussobjekts ist die globale Umgebung.
+;;
+;; Ein Beispiel mit einem Abschlussobjekt, dessen Umgebung nicht die globale ist:
+(define (outer-func a)
+  (λ (b) (+ a b)))
+
+(define w1 (outer-func 2))
+;; Das Abschlussobjekt w1 besteht aus dem erzeugten Lambda-Ausdruck vom Prozeduraufruf outer-func
+;; und der Umgebung beim Aufruf von outer-func. Diese Umgebung hat das Symbol a mit dem Wert 2 gebunden und da diese Umgebung die Umgebung von w1 ist, kennt w1 den Wert 2 von a.
+
+
+;; 5. Beschreiben Sie die Funktionsweise von compose und geben ein Beispiel für seine Nutzung an.
+;;
+;; Mit compose werden Prozeduren hintereinander verschachtelt und es wird die verschachtelte Prozedur zurückgegeben.
+;; Beispiel: f(x)=sqrt(x + 1)
+(define f (compose sqrt add1))
+(check-equal? (f 3) 2)
+
+
+;; 6. Warum kann man delay nicht als Funktion schreiben?
+;;
+;; Da Racket nach dem applicative-order vorgeht, werden zunächt die Argumente einer Applikation ausgewertet.
+;; Doch die Ausführungen der Argumente sollen ja gerade durch delay verzögert werden.
+
+
+;; 7. Welchen Vorteil bieten endrekursive Funktionen in Racket?
+;;
+;; Bei einer endrekursiven Funktion wird das Zwischenergebnis bei einem rekursiven Aufruf mitgegeben.
+;; Das letzte Zwischenergebnis ist das Endergebnis und kann zurückgegeben werden.
+;; Bei einer rekursiven Funktion werden zunächst die verschachtelten Operationen rekursiv aufgebaut
+;; und erst ab dem letzten rekursiven Aufruf werden die Operationen ausgeführt.
+;; Dadurch müssen die Operationen mit deren Operanden gespeichert werden, da sie nicht direkt wie bei einer endrekursiven Funktion ausgeführt werden.
+;; Eine endrekursive Funktion verbraucht demnach weniger Speicherplatz.
+
+
+;; 8. Was ist der Unterschied zwischen foldl und foldr? Wie unterscheidet sich das Laufzeitverhalten?
+;;
+;; foldr ist die rekusive Version:
+(define (my-foldr func start lst)
+  (if (null? lst)
+      start
+      (func (first lst) (my-foldr func start (rest lst)))))
+
+(check-equal? (my-foldr append '() '((1) (2) (3))) '(1 2 3))
+
+;; Laufzeitverhalten von my-foldr mit append:
+;; -> (append (1) (my-foldr))
+;; -> (append (1) (append (2) (my-foldr)))
+;; -> (append (1) (append (2) (append (3) (my-foldr))))
+;; -> (append (1) (append (2) (append (3) ()))))
+;; -> (1 2 3)
+
+;; Generell arbeitet foldr mit einer beliebigen Funktion f(x, y) mit einer Liste (a b c) wie folgt:
+;; f(a, f(b, f(c, start)))
+
+;; foldl ist die endrekusive Version:
+(define (my-foldl func acc lst)
+  (if (null? lst)
+      acc
+      (my-foldl func (func (first lst) acc) (rest lst))))
+
+(check-equal? (my-foldl append '() '((1) (2) (3))) '(3 2 1))
+
+;; Laufzeitverhalten von my-foldl mit append:
+;; -> (append (1) ())
+;; -> (append (2) (1))
+;; -> (append (3) (2 1))
+;; -> (3 2 1)
+
+;; Generell arbeitet foldl mit einer beliebigen Funktion f(x, y) mit einer Liste (a b c) wie folgt:
+;; f(c, f(b, f(a, start)))
