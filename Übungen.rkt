@@ -128,7 +128,7 @@
 
 ;; 2.3 Was ist eine Umgebung (Environment) und wie wird darüber das statische Binden umgesetzt?
 ;;
-;; Es gibt eine globale Umgebung, mithilfe des Symbols "define" ein Symbol mit einem Wert oder mit einem Lambda-Ausdruck gebunden werden kann:
+;; Es gibt eine globale Umgebung. Mithilfe des Symbols "define" kann ein Symbol mit einem Wert oder mit einem Lambda-Ausdruck gebunden werden:
 (define konstante 1)
 (define mal-2 (λ (a) (* a 2)))
 ;;
@@ -248,6 +248,11 @@
 ;; or := λx.λy.(x true y)
 
 
-;; 3.4 Mit welcher Idee kann die botschaftenorientierte Programmierung in Racket umgesetzt werden?
-;;     Erklären Sie anhand des folgenden Beispiels was genau hinter dem Symbol "konto" steckt.
-;;     ((konto auszahlen)
+;; 3.4 Erzeugen Sie ein Abschlussobjekt, welches in der globalen Umgebung gebunden wird, aber dessen Verweis auf eine Umgebung nicht die globale ist.
+
+(define (q a)
+  (λ (b) (* a b)))
+
+(define abschlussobjekt (q 2))
+
+
